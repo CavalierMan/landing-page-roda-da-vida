@@ -25,8 +25,8 @@
             <div class="logo">Roda da Vida</div>
             <p class="tagline">Sua vida em equilíbrio.</p>
             <h1 class="impact-phrase">Cansado de correr? É hora de caminhar com intenção.</h1>
-            <form class="cta-form">
-                <input type="email" name="email" placeholder="Seu melhor e-mail">
+            <form class="cta-form" id="subscribe-form">
+                <input type="email" name="email" id="email-input" placeholder="Seu melhor e-mail" required>
                 <button type="submit">Desejo encontrar meu equilíbrio</button>
             </form>
         </div>
@@ -52,7 +52,7 @@
                     </ul>
                 </div>
                 <div class="solution-image">
-                    <img src="https://via.placeholder.com/300x600/EEEEEE/333333?text=Vislumbre+do+App" alt="Vislumbre da interface do aplicativo Roda da Vida">
+                    <img src="images/mockup-app.png" alt="Vislumbre da interface do aplicativo Roda da Vida">
                 </div>
             </div>
         </section>
@@ -61,13 +61,55 @@
             <div class="container">
                 <h2>A jornada para o equilíbrio começa com o primeiro passo.</h2>
                 <p>Junte-se à comunidade de pioneiros. Deixe seu e-mail para ser um dos primeiros a receber o acesso e começar a sua jornada com mais serenidade e propósito.</p>
-                 <form class="cta-form">
-                    <input type="email" name="email" placeholder="Seu melhor e-mail">
+                 <form class="cta-form" id="subscribe-form-bottom">
+                    <input type="email" name="email" id="email-input-bottom" placeholder="Seu melhor e-mail" required>
                     <button type="submit">Desejo encontrar meu equilíbrio</button>
                 </form>
             </div>
         </section>
     </main>
+
+    <script>
+        // Função para lidar com o envio do formulário
+        const handleFormSubmit = (formId, inputId) => {
+            const form = document.getElementById(formId);
+            const emailInput = document.getElementById(inputId);
+
+            form.addEventListener('submit', function (event) {
+                // Previne o comportamento padrão do formulário (que é recarregar a página)
+                event.preventDefault();
+
+                const email = emailInput.value;
+                const serverUrl = 'http://127.0.0.1:5000/subscribe';
+
+                // Usamos a API fetch para enviar os dados para o nosso backend
+                fetch(serverUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Exibe a mensagem de resposta do servidor em um alerta
+                    alert(data.message);
+                    if (data.status === 'success') {
+                        // Limpa o campo de e-mail se o cadastro for bem-sucedido
+                        emailInput.value = '';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Erro:', error);
+                    alert('Não foi possível se conectar ao servidor. Verifique se ele está rodando.');
+                });
+            });
+        };
+
+        // Aplica a função para os dois formulários da página
+        handleFormSubmit('subscribe-form', 'email-input');
+        handleFormSubmit('subscribe-form-bottom', 'email-input-bottom');
+    </script>
 
 </body>
 </html>
