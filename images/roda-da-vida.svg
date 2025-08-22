@@ -41,7 +41,7 @@
         <textPath href="#textPath" startOffset="20%">ESPIRITUAL</textPath>
       </text>
       <text transform="rotate(225, 250, 250)">
-        <textPath href="#textPath" startOffset="20%">SOCIAL</textPath>
+        <textPath href="#textPath" startOffset="20%">AMIGOS</textPath>
       </text>
       <text transform="rotate(255, 250, 250)">
         <textPath href="#textPath" startOffset="20%">INTELECTUAL</textPath>
