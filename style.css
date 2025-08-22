@@ -166,3 +166,11 @@ body {
 .oasis-final-cta h2{
     font-size: 2em;
 }
+/* Estilo para a imagem de vislumbre do app na seção de solução */
+.solution-image img {
+  width: 100%;
+  max-width: 350px; /* Define um tamanho máximo */
+  border-radius: 25px; /* Deixa as bordas arredondadas, como uma tela */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra suave */
+  animation: none; /* Remove a animação de rotação APENAS para esta imagem */
+}
