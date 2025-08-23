@@ -5,6 +5,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import google.generativeai as genai
+import json
 # Configura a API do Google Gemini com a chave do ambiente
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
