@@ -253,3 +253,32 @@ body {
 .auth-switch a:hover {
   text-decoration: underline;
 }
+/* === ESTILOS PARA O DASHBOARD / RODA DA VIDA === */
+.wheel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas */
+    gap: 20px 30px; /* Espaçamento vertical e horizontal */
+    margin-bottom: 30px;
+}
+
+.pillar-item {
+    text-align: left;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.slider {
+    flex-grow: 1; /* Faz o slider ocupar o espaço disponível */
+}
+
+.slider-value {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #4a90e2;
+    min-width: 20px; /* Garante alinhamento */
+    text-align: center;
+}

@@ -3,16 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seu Oasis</title>
+    <title>Seu Oasis - Roda da Vida</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <main class="auth-container">
-        <div class="auth-box">
-            <h1>Bem-vindo ao seu Oasis!</h1>
-            <p>Este é o seu espaço seguro para autoconhecimento e crescimento.</p>
-            <p>Em breve, aqui você poderá preencher e visualizar a sua Roda da Vida.</p>
+        <div class="auth-box" style="max-width: 600px;"> <h1>Sua Roda da Vida</h1>
+            <p>Dê uma nota de 0 a 10 para sua satisfação atual em cada área.</p>
+            
+            <form id="wheel-form">
+                <div class="wheel-grid">
+                    </div>
+                <button type="submit" class="cta-button">Salvar minha Roda da Vida</button>
+            </form>
         </div>
     </main>
+
+    <script>
+        // --- LÓGICA DA PÁGINA DASHBOARD ---
+        const pillars = [
+            'Carreira', 'Finanças', 'Saúde', 'Família', 'Amor', 'Lazer',
+            'Espiritual', 'Amigos', 'Intelectual', 'Emocional', 'Profissional', 'Propósito'
+        ];
+        
+        const wheelGrid = document.querySelector('.wheel-grid');
+        const form = document.getElementById('wheel-form');
+
+        // Cria os 12 sliders dinamicamente
+        pillars.forEach(pillar => {
+            const pillarName = pillar.toLowerCase();
+            const pillarElement = document.createElement('div');
+            pillarElement.className = 'form-group pillar-item';
+            pillarElement.innerHTML = `
+                <label for="${pillarName}">${pillar}</label>
+                <div class="slider-container">
+                    <input type="range" id="${pillarName}" name="${pillarName}" min="0" max="10" value="5" class="slider">
+                    <span class="slider-value">5</span>
+                </div>
+            `;
+            wheelGrid.appendChild(pillarElement);
+        });
+
+        // Atualiza o valor do lado do slider
+        document.querySelectorAll('.slider').forEach(slider => {
+            slider.addEventListener('input', (event) => {
+                const valueSpan = event.target.nextElementSibling;
+                valueSpan.textContent = event.target.value;
+            });
+        });
+
+        // Lógica para enviar o formulário
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Pega o e-mail do usuário (idealmente, usaríamos um token, mas para o MVP isso funciona)
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                alert('Erro: Usuário não logado. Por favor, faça login novamente.');
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const scores = {};
+            pillars.forEach(pillar => {
+                const pillarName = pillar.toLowerCase();
+                const slider = document.getElementById(pillarName);
+                scores[pillarName] = parseInt(slider.value, 10);
+            });
+            
+            const serverUrl = 'https://roda-da-vida-backend.onrender.com/submit_wheel';
+
+            try {
+                const response = await fetch(serverUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, scores: scores })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+            } catch (error) {
+                console.error('Erro ao salvar a Roda da Vida:', error);
+                alert('Não foi possível salvar os dados. Tente novamente.');
+            }
+        });
+    </script>
 </body>
 </html>
