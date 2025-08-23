@@ -3,6 +3,10 @@ from flask_cors import CORS
 import sqlite3
 # ADICIONE ESTA LINHA AQUI
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
+import google.generativeai as genai
+# Configura a API do Google Gemini com a chave do ambiente
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # O resto do seu código continua abaixo...
 app = Flask(__name__)
@@ -179,5 +183,45 @@ def submit_wheel():
         conn.close()
 
     return jsonify(status_message), status_code
+# --- ROTA PARA O ASSISTENTE DE AVALIAÇÃO DA RODA DA VIDA ---
+@app.route('/assistente-avaliacao', methods=['POST'])
+def assistente_avaliacao():
+    data = request.get_json()
+    pillar_name = data.get('pillar_name')
+    user_text = data.get('user_text')
+
+    if not pillar_name or not user_text:
+        return jsonify({'status': 'error', 'message': 'Pilar e texto do usuário são obrigatórios.'}), 400
+
+    # O "prompt": nossa instrução para a IA
+    prompt = f"""
+    Atue como um coach de vida positivo e empático chamado Oasis.
+    Analise o sentimento e o conteúdo do seguinte texto de um usuário sobre o pilar de vida '{pillar_name}': '{user_text}'.
+    Com base no texto, sugira uma nota de 0 a 10 para a satisfação do usuário.
+    Escreva também um resumo de uma frase que valide o sentimento do usuário.
+    Responda APENAS com um objeto JSON válido no seguinte formato e nada mais:
+    {{
+      "nota_sugerida": <sua nota sugerida aqui>,
+      "resumo": "<seu resumo aqui>"
+    }}
+    """
+
+    try:
+        # Inicializa o modelo da IA
+        model = genai.GenerativeModel('gemini-1.5-flash') # Usando o modelo mais recente e rápido
+
+        # Envia o prompt para a IA e obtém a resposta
+        response = model.generate_content(prompt)
+
+        # Limpa e tenta decodificar a resposta JSON da IA
+        cleaned_response_text = response.text.strip().replace('```json', '').replace('```', '')
+        ai_response_json = json.loads(cleaned_response_text)
+
+        return jsonify(ai_response_json), 200
+
+    except Exception as e:
+        # Em caso de erro na comunicação com a IA ou na resposta dela
+        print(f"Erro na API do Gemini: {e}") # Para vermos o erro nos logs do Render
+        return jsonify({'status': 'error', 'message': 'Não foi possível obter uma resposta do assistente de IA.'}), 500
 if __name__ == '__main__':
     app.run(debug=True)
