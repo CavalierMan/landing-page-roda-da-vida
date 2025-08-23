@@ -120,5 +120,64 @@ def login():
         status_code = 401
 
     return jsonify(status_message), status_code
+# --- ROTA PARA SALVAR AS PONTUAÇÕES DA RODA DA VIDA ---
+@app.route('/submit_wheel', methods=['POST'])
+def submit_wheel():
+    data = request.get_json()
+    
+    # Pegamos o e-mail para identificar o usuário
+    email = data.get('email')
+    # Pegamos o objeto com as pontuações
+    scores = data.get('scores')
+
+    if not email or not scores:
+        return jsonify({'status': 'error', 'message': 'Dados incompletos.'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Primeiro, encontramos o ID do usuário a partir do e-mail
+        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+        user = cursor.fetchone()
+
+        if not user:
+            conn.close()
+            return jsonify({'status': 'error', 'message': 'Usuário não encontrado.'}), 404
+        
+        user_id = user['id']
+
+        # Prepara os dados para inserir na tabela wheel_scores
+        # A ordem aqui DEVE ser a mesma das colunas na tabela
+        score_data = (
+            user_id,
+            scores.get('carreira', 0), scores.get('financas', 0),
+            scores.get('saude', 0), scores.get('familia', 0),
+            scores.get('amor', 0), scores.get('lazer', 0),
+            scores.get('espiritual', 0), scores.get('amigos', 0),
+            scores.get('intelectual', 0), scores.get('emocional', 0),
+            scores.get('profissional', 0), scores.get('proposito', 0)
+        )
+
+        # Insere as pontuações no banco de dados
+        # (No futuro, podemos adicionar uma lógica de UPDATE em vez de sempre inserir)
+        cursor.execute('''
+            INSERT INTO wheel_scores (user_id, carreira, financas, saude, familia, amor, lazer, 
+                                     espiritual, amigos, intelectual, emocional, profissional, proposito)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', score_data)
+        
+        conn.commit()
+        status_message = {'status': 'success', 'message': 'Roda da Vida salva com sucesso!'}
+        status_code = 201
+
+    except Exception as e:
+        conn.rollback() # Desfaz qualquer mudança em caso de erro
+        status_message = {'status': 'error', 'message': f'Ocorreu um erro no servidor: {e}'}
+        status_code = 500
+    finally:
+        conn.close()
+
+    return jsonify(status_message), status_code
 if __name__ == '__main__':
     app.run(debug=True)
